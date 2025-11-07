@@ -1,0 +1,19 @@
+{
+  "name": "customer-service-v2",
+  "version": "2.0.0",
+  "description": "Customer Service v2 for Microservice Fusion Engine",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
+

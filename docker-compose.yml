@@ -1,0 +1,175 @@
+version: "3.9"
+
+services:
+  # ---------- Control Plane ----------
+
+  fusion-policy-store:
+    build:
+      context: .
+      dockerfile: ./fusion-policy-store/Dockerfile
+    environment:
+      - PORT=3000
+    ports:
+      - "7001:3000"
+    networks: [mfe]
+
+  fusion-engine:
+    build:
+      context: .
+      dockerfile: ./fusion-engine/Dockerfile
+    environment:
+      - POLICY_URL=http://fusion-policy-store:3000
+      - SERVICES=customers,orders,products
+      - FUSE_COMBINED_PER_MIN=30
+      - FUSE_EACH_PER_MIN=20
+      - UNFUSE_ANY_PER_MIN=40
+      - CHECK_INTERVAL_MS=5000
+      - COOLDOWN_SEC=60
+    depends_on:
+      - fusion-policy-store
+    networks: [mfe]
+
+  # ---------- Fused Services ----------
+
+  fused-customers-service:
+    build:
+      context: .
+      dockerfile: ./fused-customers-service/Dockerfile
+    environment:
+      - PORT=3000
+    ports:
+      - "7101:3000"
+    networks: [mfe]
+
+  fused-orders-service:
+    build:
+      context: .
+      dockerfile: ./fused-orders-service/Dockerfile
+    environment:
+      - PORT=3000
+    ports:
+      - "7102:3000"
+    networks: [mfe]
+
+  fused-products-service:
+    build:
+      context: .
+      dockerfile: ./fused-products-service/Dockerfile
+    environment:
+      - PORT=3000
+    ports:
+      - "7103:3000"
+    networks: [mfe]
+
+  # ---------- Base v1/v2 Services ----------
+
+  customer-service-v1:
+    build:
+      context: ./customer-service-v1
+      dockerfile: ../Dockerfile.node
+    environment:
+      - PORT=3000
+      - MODE=standalone
+    ports:
+      - "7201:3000"
+    networks: [mfe]
+
+  customer-service-v2:
+    build:
+      context: ./customer-service-v2
+      dockerfile: ../Dockerfile.node
+    environment:
+      - PORT=3000
+      - MODE=standalone
+    ports:
+      - "7202:3000"
+    networks: [mfe]
+
+  order-service-v1:
+    build:
+      context: ./order-service-v1
+      dockerfile: ../Dockerfile.node
+    environment:
+      - PORT=3000
+      - MODE=standalone
+    ports:
+      - "7301:3000"
+    networks: [mfe]
+
+  order-service-v2:
+    build:
+      context: ./order-service-v2
+      dockerfile: ../Dockerfile.node
+    environment:
+      - PORT=3000
+      - MODE=standalone
+    ports:
+      - "7302:3000"
+    networks: [mfe]
+
+  product-service-v1:
+    build:
+      context: ./product-service-v1
+      dockerfile: ../Dockerfile.node
+    environment:
+      - PORT=3000
+      - MODE=standalone
+    ports:
+      - "7401:3000"
+    networks: [mfe]
+
+  product-service-v2:
+    build:
+      context: ./product-service-v2
+      dockerfile: ../Dockerfile.node
+    environment:
+      - PORT=3000
+      - MODE=standalone
+    ports:
+      - "7402:3000"
+    networks: [mfe]
+
+  # ---------- Gateway ----------
+
+  fusion-gateway:
+    build:
+      context: .
+      dockerfile: ./fusion-gateway/Dockerfile
+    environment:
+      - PORT=5000
+      - FUSION_POLICY_URL=http://fusion-policy-store:3000
+      - FUSION_RESOLVE_TTL_SEC=0
+
+      # Customers
+      - CUSTOMERS_V1_URI=http://customer-service-v1:3000
+      - CUSTOMERS_V2_URI=http://customer-service-v2:3000
+      - CUSTOMERS_FUSED_URI=http://fused-customers-service:3000
+
+      # Orders
+      - ORDERS_V1_URI=http://order-service-v1:3000
+      - ORDERS_V2_URI=http://order-service-v2:3000
+      - ORDERS_FUSED_URI=http://fused-orders-service:3000
+
+      # Products
+      - PRODUCTS_V1_URI=http://product-service-v1:3000
+      - PRODUCTS_V2_URI=http://product-service-v2:3000
+      - PRODUCTS_FUSED_URI=http://fused-products-service:3000
+
+    depends_on:
+      - fusion-policy-store
+      - fused-customers-service
+      - fused-orders-service
+      - fused-products-service
+      - customer-service-v1
+      - customer-service-v2
+      - order-service-v1
+      - order-service-v2
+      - product-service-v1
+      - product-service-v2
+
+    ports:
+      - "5000:5000"
+    networks: [mfe]
+
+networks:
+  mfe: {}
