@@ -37,6 +37,10 @@ Core components of the Fusion System:
 | Base Services (v1/v2) | Independent service versions |
 | Fused Services | Unified execution of business logic from both versions |
 
+![This is the High Level Fusion Architecture diagram](docs/High-Level_Fusion_Architecture.png)
+
+![This is Version Resolution & Routing Flow](docs/Version_Resolution_&_Routing%20Flow.png)
+
 ## 2. Microservice Directory Convention
 
 Each service adheres to the following repository layout:
