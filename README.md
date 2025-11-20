@@ -1,4 +1,4 @@
-# NeuroFusion Services Architecture (NFSA) (Microservice Fusion System) – Service Implementation & Architecture (Patent-Grade)
+# DMFE-Dynamic-Microservice-Fusion-Engine (Microservice Fusion System) – Service Implementation & Architecture (Patent-Grade)
 
 ## Overview
 
